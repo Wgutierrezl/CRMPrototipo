@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CRMControllers.Entidades
 {
-    class Categorias
+    public class Categorias
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

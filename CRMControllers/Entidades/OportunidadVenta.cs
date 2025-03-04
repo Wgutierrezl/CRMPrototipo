@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CRMControllers.Entidades
 {
-    class OportunidadVenta
+    public class OportunidadVenta
     {
         [Key]
         public int OportunidadID { get; set; }

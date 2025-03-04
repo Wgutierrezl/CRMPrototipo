@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CRMControllers.Entidades
 {
-    class Clientes
+    public class Clientes
     {
         [Key]
         public int ClienteID { get; set; }
