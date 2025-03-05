@@ -13,7 +13,7 @@ namespace CRMControllers.Entidades
         public int ClienteID { get; set; }
         public string? Nombre { get; set; }
         public string? Apellido { get; set; }
-        public string? Correp { get; set; }
+        public string? Correo { get; set; }
         public string? Direccion { get; set; }
         public string? Empresa { get; set; }
         public DateOnly FechaRegistro { get; set; }
