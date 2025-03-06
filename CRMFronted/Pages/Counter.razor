@@ -1,5 +1,6 @@
 ﻿@page "/counter"
 @inject IServiciosClientes ServiciosClientes
+@using CRMControllers.Entidades;
 
 <PageTitle>Counter</PageTitle>
 
@@ -32,13 +33,14 @@ else
                 <tr>
                     <td>@item.ClienteID</td>
                     <td>@item.Nombre</td>
-                    <td>@item.Email</td>
-                    <td>@item.Cedula</td>
+                    <td>@item.Apellido</td>
+                    <td>@item.TipoCliente</td>
                 </tr>
             }
         </tbody>
     </table>
 }
+
 
 @code {
     private int currentCount = 0;
@@ -49,9 +51,8 @@ else
     }
 
 
-    public List<Clientes>? ListaC { get; set; }
+    public List<Clientes>? ListaC { get; set; } 
     public string? MessageGet { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
         try
@@ -69,13 +70,13 @@ else
                 MessageGet = await response.GetErrorMessage();
             }
 
-        }catch(Exception e)
+        }
+        catch (Exception e)
         {
             ListaC = null;
             MessageGet = e.Message;
 
         }
-
     }
-
-}
+    
+  }
