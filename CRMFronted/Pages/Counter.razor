@@ -1,4 +1,5 @@
 ﻿@page "/counter"
+@inject IServiciosClientes ServiciosClientes
 
 <PageTitle>Counter</PageTitle>
 
@@ -8,6 +9,37 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
+
+<h1>Lista de Clientes</h1>
+@if (ListaC == null)
+{
+    <h4>....Loading</h4>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>ClienteID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Cedula</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ListaC)
+            {
+                <tr>
+                    <td>@item.ClienteID</td>
+                    <td>@item.Nombre</td>
+                    <td>@item.Email</td>
+                    <td>@item.Cedula</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 @code {
     private int currentCount = 0;
 
@@ -15,4 +47,35 @@
     {
         currentCount++;
     }
+
+
+    public List<Clientes>? ListaC { get; set; }
+    public string? MessageGet { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string url = "https://localhost:7053/api/Clientes";
+            var response = await ServiciosClientes.GetClientes<List<Clientes>>(url);
+            if (!response.Error)
+            {
+                ListaC = response.Response;
+                MessageGet = String.Empty;
+            }
+            else
+            {
+                ListaC = null;
+                MessageGet = await response.GetErrorMessage();
+            }
+
+        }catch(Exception e)
+        {
+            ListaC = null;
+            MessageGet = e.Message;
+
+        }
+
+    }
+
 }
