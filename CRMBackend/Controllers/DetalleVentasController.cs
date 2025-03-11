@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CRMBackend.Data;
 using CRMControllers.Entidades;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CRMBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DetalleVentasController : ControllerBase
     {
         private readonly DataContext _context;

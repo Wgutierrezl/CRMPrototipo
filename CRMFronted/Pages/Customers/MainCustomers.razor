@@ -1,0 +1,97 @@
+﻿@page "/Customers/MainCustomers"
+@inject IServiciosClientes ServiciosClientes
+@attribute [Authorize(Roles = "Administrador,Vendedor")]
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customers</title>
+    <link rel="stylesheet" href="~/css/app.css" />
+</head>
+<body>
+
+    <h1>Customers</h1>
+
+    <button class="btn-outline-primary" @onclick="CreatedCustomer">New</button>
+
+    @if (ListaC == null)
+    {
+        <h3>....Loading</h3>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>ClienteID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Direccion</th>
+                    <th>Empresa</th>
+                    <th>FechaRegistro</th>
+                    <th>TipoCliente</th>
+                    <th>Editar</th>
+                    <th>Borrar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in ListaC)
+                {
+                    <tr>
+                        <td>@item.ClienteID</td>
+                        <td>@item.Nombre</td>
+                        <td>@item.Apellido</td>
+                        <td>@item.Direccion</td>
+                        <td>@item.Empresa</td>
+                        <td>@item.FechaRegistro</td>
+                        <td>@item.TipoCliente</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+
+
+
+</body>
+</html>
+
+@code {
+
+    public List<Clientes>? ListaC { get; set; }
+    public string? MessageGet { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string url = "https://localhost:7053/api/Clientes";
+            var response = await ServiciosClientes.GetClientes<List<Clientes>>(url);
+            if (!response.Error)
+            {
+                ListaC = response.Response;
+                MessageGet = String.Empty;
+            }
+            else
+            {
+                ListaC = null;
+                MessageGet = await response.GetErrorMessage();
+            }
+
+        }catch(Exception e)
+        {
+            ListaC = null;
+            MessageGet = e.Message;
+        }
+
+    }
+
+
+    public async Task CreatedCustomer()
+    {
+       
+    }
+}

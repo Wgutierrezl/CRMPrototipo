@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CRMBackend.Data;
 using CRMControllers.Entidades;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CRMBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ClientesController : ControllerBase
     {
         private readonly DataContext _context;
@@ -23,6 +25,7 @@ namespace CRMBackend.Controllers
 
         // GET: api/Clientes
         [HttpGet]
+
         public async Task<ActionResult<IEnumerable<Clientes>>> GetClientes()
         {
             return await _context.Clientes.ToListAsync();

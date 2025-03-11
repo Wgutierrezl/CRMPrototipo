@@ -1,6 +1,6 @@
 ﻿@page "/counter"
 @inject IServiciosClientes ServiciosClientes
-@using CRMControllers.Entidades;
+@attribute [Authorize(Roles = "Soporte")]
 
 <PageTitle>Counter</PageTitle>
 

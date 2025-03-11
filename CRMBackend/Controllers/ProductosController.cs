@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CRMBackend.Data;
+using CRMControllers.Entidades;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CRMBackend.Data;
-using CRMControllers.Entidades;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace CRMBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductosController : ControllerBase
     {
         private readonly DataContext _context;
@@ -19,21 +19,19 @@ namespace CRMBackend.Controllers
         public ProductosController(DataContext context)
         {
             _context = context;
+            
         }
 
-        // GET: api/Productos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Productos>>> GetProductos()
         {
-            return await _context.Productos.ToListAsync();
+           return await _context.Productos.ToListAsync();
         }
 
-        // GET: api/Productos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Productos>> GetProductos(int id)
         {
             var productos = await _context.Productos.FindAsync(id);
-
             if (productos == null)
             {
                 return NotFound();
@@ -42,10 +40,18 @@ namespace CRMBackend.Controllers
             return productos;
         }
 
-        // PUT: api/Productos/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Productos>> PostProductos(Productos productos)
+        {
+            _context.Productos.Add(productos);
+            await _context.SaveChangesAsync();
+
+            return Ok(productos);
+
+        }
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProductos(int id, Productos productos)
+        public async Task<ActionResult<Productos>> PutProductos(int id, Productos productos)
         {
             if (id != productos.ProductoID)
             {
@@ -54,13 +60,12 @@ namespace CRMBackend.Controllers
 
             _context.Entry(productos).State = EntityState.Modified;
 
-            try
+            try 
             {
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
+            }catch(DbUpdateConcurrencyException)
             {
-                if (!ProductosExists(id))
+                if(!ExistProducts(id))
                 {
                     return NotFound();
                 }
@@ -68,39 +73,28 @@ namespace CRMBackend.Controllers
                 {
                     throw;
                 }
+
             }
-
             return NoContent();
+
         }
 
-        // POST: api/Productos
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Productos>> PostProductos(Productos productos)
-        {
-            _context.Productos.Add(productos);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetProductos", new { id = productos.ProductoID }, productos);
-        }
-
-        // DELETE: api/Productos/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProductos(int id)
+        public async Task<ActionResult> DeleteProductos(int id)
         {
-            var productos = await _context.Productos.FindAsync(id);
-            if (productos == null)
+            var producto = await _context.Productos.FindAsync(id);
+            if (producto == null)
             {
                 return NotFound();
             }
 
-            _context.Productos.Remove(productos);
+            _context.Productos.Remove(producto);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool ProductosExists(int id)
+        private bool ExistProducts(int id)
         {
             return _context.Productos.Any(e => e.ProductoID == id);
         }
