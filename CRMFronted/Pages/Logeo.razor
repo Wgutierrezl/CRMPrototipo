@@ -49,7 +49,7 @@
 
     public async Task IniciarSesion()
     {
-        var loginrResponse = await httpClient.PostAsJsonAsync<LoginDTO>("https://localhost:7244/api/User/Login", login);
+        var loginrResponse = await httpClient.PostAsJsonAsync<LoginDTO>("https://localhost:7053/Login", login);
         if (loginrResponse.IsSuccessStatusCode)
         {
             var sesionUsuario = await loginrResponse.Content.ReadFromJsonAsync<SesionDTO>();
