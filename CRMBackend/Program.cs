@@ -65,6 +65,11 @@ var app = builder.Build();
 
 // Configurar el middleware de autenticación y autorización
 app.UseAuthentication();
+app.UseCors(policy =>
+    policy.WithOrigins("https://localhost:7022")
+          .AllowAnyMethod()
+          .AllowAnyHeader()
+          .AllowCredentials());
 app.UseAuthorization();
 
 // Configurar Swagger y UI

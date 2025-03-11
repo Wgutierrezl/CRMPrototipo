@@ -19,9 +19,4 @@
     <ProjectReference Include="..\CRMControllers\CRMControllers.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\Categories\" />
-    <Folder Include="Pages\Contacts\" />
-  </ItemGroup>
-
 </Project>
