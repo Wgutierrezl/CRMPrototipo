@@ -1,5 +1,7 @@
 ﻿
+using Microsoft.JSInterop;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Headers;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Text.Json;
@@ -9,16 +11,27 @@ namespace CRMFronted.Servicios
     public class ServiciosClientes : IServiciosClientes
     {
         private readonly HttpClient _httpclient;
-
-        public ServiciosClientes(HttpClient httpclient)
-        {
-            _httpclient = httpclient;
-        }
-
+        private readonly IJSRuntime _jsRuntime; // Inyectamos JS para acceder a sessionStorage
         private JsonSerializerOptions _serialice = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         };
+
+        public ServiciosClientes(HttpClient httpclient, IJSRuntime jsRuntime)
+        {
+            _httpclient = httpclient;
+            _jsRuntime = jsRuntime;
+        }
+
+        private async Task AgregarTokenAsync()
+        {
+            var token = await _jsRuntime.InvokeAsync<string>("sessionStorage.getItem", "authToken");
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpclient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+        }
 
         public async Task<HttpResponseWrapper<object>> DeleteClientes(string url)
         {
@@ -41,6 +54,7 @@ namespace CRMFronted.Servicios
 
         public async Task<HttpResponseWrapper<T>> GetClientes<T>(string url)
         {
+            await AgregarTokenAsync();
             var responsehttp=await _httpclient.GetAsync(url);
             var content=await responsehttp.Content.ReadAsStringAsync();
             if (responsehttp.IsSuccessStatusCode)
