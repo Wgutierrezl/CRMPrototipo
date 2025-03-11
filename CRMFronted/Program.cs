@@ -5,6 +5,7 @@ using CRMFronted.Servicios;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using System.Net.Http.Headers;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -12,6 +13,19 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7053/") });
+builder.Services.AddScoped(async sp =>
+{
+    var sessionStorage = sp.GetRequiredService<ISessionStorageService>();
+    var httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7053/") };
+
+    var token = await sessionStorage.GetItemAsync<string>("token");
+    if (!string.IsNullOrEmpty(token))
+    {
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    }
+
+    return httpClient;
+});
 builder.Services.AddScoped<AuthenticationStateProvider, AutenticacionExtension>();
 builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddAuthorizationCore();
