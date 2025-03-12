@@ -28,7 +28,7 @@ namespace CRMFronted.Extensiones
                     new Claim("UsuarioID",sesionusuario.UsuarioID),
                     new Claim(ClaimTypes.Name,sesionusuario.Nombre),
                     new Claim(ClaimTypes.Email,sesionusuario.Correo),
-                    new Claim(ClaimTypes.Role,sesionusuario.Rol),
+                    new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", sesionusuario.Rol),
                     new Claim("Token",sesionusuario.Token)
                 },"JwtAuth"));
 
@@ -56,7 +56,7 @@ namespace CRMFronted.Extensiones
                 new Claim("UsuarioID",usuario.UsuarioID),
                 new Claim(ClaimTypes.Name,usuario.Nombre),
                 new Claim(ClaimTypes.Email,usuario.Correo),
-                new Claim(ClaimTypes.Role,usuario.Rol),
+                new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", usuario.Rol),
                 new Claim("Token",usuario.Token)
 
             },"JwtAuth"));

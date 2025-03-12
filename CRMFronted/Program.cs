@@ -27,6 +27,7 @@ builder.Services.AddScoped(async sp =>
     return httpClient;
 });
 builder.Services.AddScoped<AuthenticationStateProvider, AutenticacionExtension>();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<IServiciosClientes, ServiciosClientes>();

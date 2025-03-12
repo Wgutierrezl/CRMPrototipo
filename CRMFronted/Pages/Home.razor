@@ -1,4 +1,5 @@
 ﻿@page "/Home"
+@inject AuthService AuthService
 @attribute [Authorize]
 
 <PageTitle>Home</PageTitle>
@@ -10,5 +11,17 @@
 		<h1>Bienvenido:</h1>
 		<h1>Bienvenido: @context.User.Identity!.Name</h1>
 		<h1>Tu UsuarioID:@context.User.FindFirst("UsuarioID")?.Value</h1>
+		<h1>Tu Cargo:@Rol</h1>
+
 	</Authorized>
 </AuthorizeView>
+
+@code{
+
+	public string? Rol { get; set; }
+	protected override async Task OnInitializedAsync()
+	{
+
+		Rol = await AuthService.ObtenerRolUsuario();
+	}
+}
