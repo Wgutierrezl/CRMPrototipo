@@ -58,9 +58,9 @@ namespace CRMBackend.Controllers
             var claims = new List<Claim>
             {
                 new Claim("UsuarioID",usuarios.IDUsuario),
-                new Claim(ClaimTypes.Name,usuarios.Nombre),
-                new Claim(ClaimTypes.Email,usuarios.Correo),
-                new Claim(ClaimTypes.Role,usuarios.Rol)
+                new Claim("Nombre",usuarios.Nombre),
+                new Claim("Email",usuarios.Correo),
+                new Claim("Rol",usuarios.Rol)
             };
 
             var key = new SymmetricSecurityKey(secretKey);
@@ -77,5 +77,16 @@ namespace CRMBackend.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        [HttpGet("verificar-rol")]
+        public IActionResult VerificarRol()
+        {
+            var user = HttpContext.User;
+            var roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+
+            return Ok(new { Usuario = user.Identity.Name, Roles = roles });
+        }
+
     }
+
+
 }

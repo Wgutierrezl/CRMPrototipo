@@ -23,23 +23,31 @@ namespace CRMFronted.Extensiones
             ClaimsPrincipal claimsprincipal;
             if (sesionusuario != null)
             {
+                Console.WriteLine($"UsuarioID: {sesionusuario.UsuarioID}");
+                Console.WriteLine($"Nombre: {sesionusuario.Nombre}");
+                Console.WriteLine($"Correo: {sesionusuario.Correo}");
+                Console.WriteLine($"Rol: {sesionusuario.Rol}");
+                Console.WriteLine($"Token: { sesionusuario.Token}");// 👈 Verifica que tiene valor
+
                 claimsprincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                 {
-                    new Claim("UsuarioID",sesionusuario.UsuarioID),
-                    new Claim(ClaimTypes.Name,sesionusuario.Nombre),
-                    new Claim(ClaimTypes.Email,sesionusuario.Correo),
-                    new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", sesionusuario.Rol),
-                    new Claim("Token",sesionusuario.Token)
-                },"JwtAuth"));
+                        new Claim("UsuarioID", sesionusuario.UsuarioID),
+                        new Claim("Nombre", sesionusuario.Nombre),
+                        new Claim("Email", sesionusuario.Correo),
+                        new Claim("Rol", sesionusuario.Rol),
+                        new Claim("Token", sesionusuario.Token)
+                }, "JwtAuth"));
 
                 await _sessionStorageService.GuardarStorage("sesionUsuario", sesionusuario);
-
+                await _sessionStorageService.GuardarStorage("authToken", sesionusuario.Token);
+                
             }
             else
             {
                 claimsprincipal = _sininformacion;
                 await _sessionStorageService.RemoveItemAsync("sesionUsuario");
             }
+
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsprincipal)));
         }
 
@@ -54,9 +62,9 @@ namespace CRMFronted.Extensiones
             var claimsprincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
             {
                 new Claim("UsuarioID",usuario.UsuarioID),
-                new Claim(ClaimTypes.Name,usuario.Nombre),
-                new Claim(ClaimTypes.Email,usuario.Correo),
-                new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", usuario.Rol),
+                new Claim("Nombre",usuario.Nombre),
+                new Claim("Email",usuario.Correo),
+                new Claim("Rol", usuario.Rol),
                 new Claim("Token",usuario.Token)
 
             },"JwtAuth"));

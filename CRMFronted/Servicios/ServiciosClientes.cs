@@ -29,7 +29,12 @@ namespace CRMFronted.Servicios
 
             if (!string.IsNullOrEmpty(token))
             {
-                _httpclient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                Console.WriteLine($"Token enviado: {token}");
+                _httpclient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Trim('"'));
+            }
+            else
+            {
+                Console.WriteLine("⚠ No se encontró token en sessionStorage.");
             }
         }
 

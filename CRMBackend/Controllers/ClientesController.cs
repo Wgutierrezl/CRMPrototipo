@@ -11,9 +11,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CRMBackend.Controllers
 {
+    [Authorize(Roles = "Administrador,Vendedor")]
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ClientesController : ControllerBase
     {
         private readonly DataContext _context;

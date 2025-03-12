@@ -18,7 +18,7 @@ builder.Services.AddScoped(async sp =>
     var sessionStorage = sp.GetRequiredService<ISessionStorageService>();
     var httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7053/") };
 
-    var token = await sessionStorage.GetItemAsync<string>("token");
+    var token = await sessionStorage.GetItemAsync<string>("Token");
     if (!string.IsNullOrEmpty(token))
     {
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
