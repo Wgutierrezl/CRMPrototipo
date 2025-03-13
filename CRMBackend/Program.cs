@@ -1,7 +1,8 @@
 using CRMBackend.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using CRMBackend.Custom;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Text;
@@ -15,80 +16,44 @@ builder.Services.AddSwaggerGen();
 
 // Configurar la conexión a la base de datos
 builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer("name=LocalConnection"));
-
-// Configuración de JWT
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? throw new ArgumentNullException("SecretKey no encontrada en la configuración"));
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(secretKey),
-            RoleClaimType = "Rol"
-        };
-    });
-
-builder.Services.AddAuthorization(options =>
+builder.Services.AddSingleton<Utilidades>();
+builder.Services.AddAuthentication(config =>
 {
-    options.AddPolicy("Administrador", policy => policy.RequireRole("Administrador"));
-    options.AddPolicy("Vendedor", policy => policy.RequireRole("Vendedor"));
-    options.AddPolicy("Soporte", policy => policy.RequireRole("Soporte"));
-});
-
-// Configurar Swagger con autenticación
-builder.Services.AddSwaggerGen(c =>
+    config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(config =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "API CRM Prototype", Version = "v1" });
-
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    config.RequireHttpsMetadata = false;
+    config.SaveToken = true;
+    config.TokenValidationParameters = new TokenValidationParameters
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Ingrese el token JWT en el formato: Bearer {token}"
-    });
+        ValidateIssuerSigningKey = true,
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero,
+        IssuerSigningKey = new SymmetricSecurityKey
+        (Encoding.UTF8.GetBytes(builder.Configuration["jwt:key"]!))
+    };
+}
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            new string[] {}
-        }
-    });
-});
+
+);
+
+
 
 var app = builder.Build();
 
 // Configurar el middleware de autenticación y autorización
 app.UseAuthentication();
+
 app.UseCors(policy =>
     policy.WithOrigins("https://localhost:7022")
           .AllowAnyMethod()
           .AllowAnyHeader()
           .AllowCredentials());
 app.UseAuthorization();
-
-// Configurar Swagger y UI
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API CRM Prototype v1");
-    c.RoutePrefix = string.Empty; // Para que Swagger esté en la raíz
-});
-
+app.UseAuthentication();
 // Configurar el pipeline de solicitudes HTTP
 if (app.Environment.IsDevelopment())
 {
