@@ -40,8 +40,8 @@ namespace CRMBackend.Custom
         {
             var userclaim = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier,modelo.IDUsuario.ToString()),
-                new Claim(ClaimTypes.Email,modelo.Correo!),
+                new Claim("UsuarioID",modelo.IDUsuario.ToString()),
+                new Claim("Email",modelo.Correo!),
                 new Claim(ClaimTypes.Role,modelo.Rol!)
 
             };
@@ -49,13 +49,15 @@ namespace CRMBackend.Custom
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_iconfiguration["jwt:key"]!));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512Signature);
 
-            var jwtconfig = new JwtSecurityToken(
-                claims: userclaim,
-                expires: DateTime.UtcNow.AddHours(2),
-                signingCredentials: credentials
-            );
+            var jwtConfig = new JwtSecurityToken(
+            issuer: _iconfiguration["jwt:issuer"],  // 👈 Agregar el emisor
+            audience: _iconfiguration["jwt:audience"],  // 👈 Agregar la audiencia
+            claims: userclaim,
+            expires: DateTime.UtcNow.AddHours(2),
+            signingCredentials: credentials
+    );
 
-            return new JwtSecurityTokenHandler().WriteToken(jwtconfig);
+            return new JwtSecurityTokenHandler().WriteToken(jwtConfig);
         }
     }
 }

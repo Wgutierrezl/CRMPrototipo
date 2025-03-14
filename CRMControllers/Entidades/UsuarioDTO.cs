@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace CRMControllers.Entidades
 {
-    public class SesionDTO
+    public class UsuarioDTO
     {
         public string? UsuarioID { get; set; }
         public string? Nombre { get; set; }
         public string? Correo { get; set; }
         public string? Contraseña { get; set; }
         public string? Rol { get; set; }
-        public string? Token { get; set; }
+        public string? Estado { get; set; }
+
     }
 }

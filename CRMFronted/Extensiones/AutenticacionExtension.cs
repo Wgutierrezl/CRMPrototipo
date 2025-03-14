@@ -1,6 +1,7 @@
 ﻿using Blazored.SessionStorage;
 using CRMControllers.Entidades;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 
@@ -27,20 +28,20 @@ namespace CRMFronted.Extensiones
                 Console.WriteLine($"Nombre: {sesionusuario.Nombre}");
                 Console.WriteLine($"Correo: {sesionusuario.Correo}");
                 Console.WriteLine($"Rol: {sesionusuario.Rol}");
-                Console.WriteLine($"Token: { sesionusuario.Token}");// 👈 Verifica que tiene valor
+                Console.WriteLine($"Token: {sesionusuario.Token}");// 👈 Verifica que tiene valor
 
                 claimsprincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                 {
                         new Claim("UsuarioID", sesionusuario.UsuarioID),
                         new Claim("Nombre", sesionusuario.Nombre),
                         new Claim("Email", sesionusuario.Correo),
-                        new Claim("Rol", sesionusuario.Rol),
+                        new Claim(ClaimTypes.Role, sesionusuario.Rol),
                         new Claim("Token", sesionusuario.Token)
                 }, "JwtAuth"));
 
                 await _sessionStorageService.GuardarStorage("sesionUsuario", sesionusuario);
                 await _sessionStorageService.GuardarStorage("authToken", sesionusuario.Token);
-                
+
             }
             else
             {
@@ -50,6 +51,36 @@ namespace CRMFronted.Extensiones
 
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsprincipal)));
         }
+
+        //public async Task ActualizarEstadoAutenticacion(SesionDTO? sesionusuario)
+        //{
+        //    ClaimsPrincipal claimsPrincipal;
+        //    if (sesionusuario != null)
+        //    {
+        //        // Decodificar el token JWT
+        //        var handler = new JwtSecurityTokenHandler();
+        //        var jwtToken = handler.ReadJwtToken(sesionusuario.Token);
+
+        //        // Extraer los claims directamente del token
+        //        var claims = jwtToken.Claims.ToList();
+
+        //        // (Opcional) Agregar o transformar algún claim si lo requieres
+        //        // Por ejemplo, para asegurarte de que el rol esté en el formato correcto:
+        //        // claims.Add(new Claim(ClaimTypes.Role, sesionusuario.Rol));
+
+        //        claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims, "jwt"));
+
+        //        await _sessionStorageService.GuardarStorage("sesionUsuario", sesionusuario);
+        //        await _sessionStorageService.GuardarStorage("authToken", sesionusuario.Token);
+        //    }
+        //    else
+        //    {
+        //        claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
+        //        await _sessionStorageService.RemoveItemAsync("sesionUsuario");
+        //    }
+
+        //    NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
+        //}
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
@@ -64,7 +95,7 @@ namespace CRMFronted.Extensiones
                 new Claim("UsuarioID",usuario.UsuarioID),
                 new Claim("Nombre",usuario.Nombre),
                 new Claim("Email",usuario.Correo),
-                new Claim("Rol", usuario.Rol),
+                new Claim(ClaimTypes.Role, usuario.Rol),
                 new Claim("Token",usuario.Token)
 
             },"JwtAuth"));

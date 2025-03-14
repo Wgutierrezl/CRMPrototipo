@@ -1,4 +1,5 @@
 ﻿using CRMBackend.Data;
+using CRMBackend.Custom;
 using CRMControllers.Entidades;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -10,20 +11,23 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Text;
+using System.Runtime.CompilerServices;
+using NuGet.Common;
 
 namespace CRMBackend.Controllers
 {
     [Route("api/[controller]")]
+    [AllowAnonymous]
     [ApiController]
     public class UserController : ControllerBase
     {
         private readonly DataContext _context;
-        private readonly IConfiguration _configuracion;
+        private readonly Utilidades _utilidades;
 
-        public UserController(DataContext context,IConfiguration configuracion)
+        public UserController(DataContext context,Utilidades utilidades)
         {
             _context = context;
-            _configuracion = configuracion;
+            _utilidades = utilidades;
         }
 
 
@@ -31,60 +35,55 @@ namespace CRMBackend.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDTO login)
         {
-            var usuario = await _context.Usuarios.Where(e => e.Correo == login.Email && e.Contraseña == login.Clave).FirstOrDefaultAsync();
+            var usuario = await _context.Usuarios.Where(e => e.Correo == login.Email && e.Contraseña == _utilidades.EncryptSHA256(login.Clave!)).FirstOrDefaultAsync();
             if (usuario == null)
             {
-                return Unauthorized(new { mensaje = "correo o contraseñas incorrectas" });
+                return StatusCode(StatusCodes.Status200OK, new { IsSuccess = false, Token = "" });
+            }
+            else
+            {
+                return Ok(new SesionDTO
+                {
+                    UsuarioID = usuario.IDUsuario,
+                    Nombre = usuario.Nombre,
+                    Correo = usuario.Correo,
+                    Rol = usuario.Rol,
+                    Token = _utilidades.GenerateJWT(usuario)
+                });
             }
 
-            var token = GenerarToken(usuario);
-
-            return Ok(new SesionDTO
-            {
-                UsuarioID = usuario.IDUsuario,
-                Nombre = usuario.Nombre,
-                Correo = usuario.Correo,
-                Rol = usuario.Rol,
-                Token = token
-            });
-
         }
 
-        private string GenerarToken(Usuarios usuarios)
-        {
-            var jwtsetting = _configuracion.GetSection("JwtSettings");
-            var secretKey = Encoding.UTF8.GetBytes(jwtsetting["SecretKey"]);
 
-            var claims = new List<Claim>
+        [HttpPost]
+        [Route("Registrarse")]
+        public async Task<ActionResult<Usuarios>> Registrarse(UsuarioDTO user)
+        {
+            var UserCreated = new Usuarios
             {
-                new Claim("UsuarioID",usuarios.IDUsuario),
-                new Claim("Nombre",usuarios.Nombre),
-                new Claim("Email",usuarios.Correo),
-                new Claim("Rol",usuarios.Rol)
+                IDUsuario = user.UsuarioID,
+                Nombre = user.Nombre,
+                Correo = user.Correo,
+                Contraseña = _utilidades.EncryptSHA256(user.Contraseña!),
+                Rol = user.Rol,
+                Estado = user.Estado!
+
             };
 
-            var key = new SymmetricSecurityKey(secretKey);
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-                issuer: jwtsetting["Issuer"],
-                audience: jwtsetting["Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
-                signingCredentials: creds
-                );
+            await _context.Usuarios.AddAsync(UserCreated);
+            await _context.SaveChangesAsync();
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            if (UserCreated.IDUsuario != null)
+            {
+                return StatusCode(StatusCodes.Status200OK, new { IsSuccess = true });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status200OK, new { IsSuccess = false });
+            }
         }
 
-        [HttpGet("verificar-rol")]
-        public IActionResult VerificarRol()
-        {
-            var user = HttpContext.User;
-            var roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
-
-            return Ok(new { Usuario = user.Identity.Name, Roles = roles });
-        }
 
     }
 
